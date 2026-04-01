@@ -26,6 +26,9 @@ const STATIC_PATH =
 
 const app = express();
 
+// trust proxy so express-rate-limit works behind Cloudflare tunnel
+app.set("trust proxy", 1);
+
 // Set up Shopify authentication and webhook handling
 app.get(shopify.config.auth.path, shopify.auth.begin());
 app.get(
