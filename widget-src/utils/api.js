@@ -1,8 +1,9 @@
-const APP_URL = "https://countdown-timer-app.fly.dev"; // TODO: update with actual deployed URL
+// Use the app proxy path — Shopify routes /apps/countdown/* to our backend
+const PROXY_BASE = "/apps/countdown";
 
 export async function fetchTimers(shop, productId) {
   try {
-    const url = `${APP_URL}/api/storefront/timers?shop=${encodeURIComponent(shop)}&productId=${encodeURIComponent(productId)}`;
+    const url = `${PROXY_BASE}/timers?shop=${encodeURIComponent(shop)}&productId=${encodeURIComponent(productId)}`;
     const res = await fetch(url);
     if (!res.ok) return [];
     return await res.json();
@@ -14,7 +15,7 @@ export async function fetchTimers(shop, productId) {
 
 export function trackImpression(shop, timerId) {
   // fire and forget — don't block rendering
-  fetch(`${APP_URL}/api/storefront/impression`, {
+  fetch(`${PROXY_BASE}/impression`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ shop, timerId }),
