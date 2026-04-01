@@ -6,6 +6,9 @@ import {
   Select,
   ColorPicker,
   hsbToHex,
+  Button,
+  Tag,
+  InlineStack,
 } from "@shopify/polaris";
 
 // polaris v10 doesn't export hexToHsb, so we do it manually
@@ -68,7 +71,6 @@ const defaultForm = {
   endTime: "",
   duration: "3600",
   targetType: "all",
-  targetIds: "",
   position: "top",
   size: "medium",
   urgencyEffect: "color_pulse",
@@ -79,6 +81,7 @@ export default function TimerModal({ open, onClose, onSubmit, timer, saving }) {
   const [form, setForm] = useState(defaultForm);
   const [color, setColor] = useState({ hue: 120, saturation: 1, brightness: 0.6 });
   const [errors, setErrors] = useState({});
+  const [selectedResources, setSelectedResources] = useState([]);
 
   // populate form when editing
   useEffect(() => {
@@ -96,12 +99,20 @@ export default function TimerModal({ open, onClose, onSubmit, timer, saving }) {
         endTime: end ? end.toTimeString().slice(0, 5) : "",
         duration: timer.duration ? String(timer.duration) : "3600",
         targetType: timer.targetType || "all",
-        targetIds: timer.targetIds ? timer.targetIds.join(", ") : "",
         position: timer.style?.position || "top",
         size: timer.style?.size || "medium",
         urgencyEffect: timer.style?.urgencyEffect || "color_pulse",
         message: timer.style?.message || "Sale ends in:",
       });
+
+      // restore previously selected resources for the picker tags
+      if (timer.targetIds?.length) {
+        setSelectedResources(
+          timer.targetIds.map((id) => ({ id, title: id }))
+        );
+      } else {
+        setSelectedResources([]);
+      }
 
       if (timer.style?.accentColor) {
         try {
@@ -113,12 +124,33 @@ export default function TimerModal({ open, onClose, onSubmit, timer, saving }) {
     } else {
       setForm(defaultForm);
       setColor({ hue: 120, saturation: 1, brightness: 0.6 });
+      setSelectedResources([]);
     }
     setErrors({});
   }, [timer, open]);
 
   const handleChange = useCallback((field) => {
     return (value) => setForm((prev) => ({ ...prev, [field]: value }));
+  }, []);
+
+  const openResourcePicker = useCallback(async () => {
+    const type = form.targetType === "products" ? "product" : "collection";
+    try {
+      const selected = await shopify.resourcePicker({ type, multiple: true });
+      if (selected && selected.length > 0) {
+        const resources = selected.map((item) => ({
+          id: item.id,
+          title: item.title || item.id,
+        }));
+        setSelectedResources(resources);
+      }
+    } catch (e) {
+      // user cancelled the picker
+    }
+  }, [form.targetType]);
+
+  const removeResource = useCallback((idToRemove) => {
+    setSelectedResources((prev) => prev.filter((r) => r.id !== idToRemove));
   }, []);
 
   const validate = useCallback(() => {
@@ -147,9 +179,7 @@ export default function TimerModal({ open, onClose, onSubmit, timer, saving }) {
       description: form.description.trim(),
       type: form.type,
       targetType: form.targetType,
-      targetIds: form.targetIds
-        ? form.targetIds.split(",").map((s) => s.trim()).filter(Boolean)
-        : [],
+      targetIds: selectedResources.map((r) => r.id),
       style: {
         accentColor: hsbToHex(color),
         position: form.position,
@@ -167,7 +197,7 @@ export default function TimerModal({ open, onClose, onSubmit, timer, saving }) {
     }
 
     onSubmit(payload);
-  }, [form, color, validate, onSubmit]);
+  }, [form, color, selectedResources, validate, onSubmit]);
 
   const title = timer ? "Edit Timer" : "Create New Timer";
   const primaryAction = {
@@ -271,14 +301,22 @@ export default function TimerModal({ open, onClose, onSubmit, timer, saving }) {
           />
 
           {form.targetType !== "all" && (
-            <TextField
-              label={form.targetType === "products" ? "Product IDs" : "Collection IDs"}
-              value={form.targetIds}
-              onChange={handleChange("targetIds")}
-              placeholder="Comma-separated IDs"
-              helpText="Enter Shopify resource IDs separated by commas"
-              autoComplete="off"
-            />
+            <div>
+              <Button onClick={openResourcePicker}>
+                {form.targetType === "products" ? "Select products" : "Select collections"}
+              </Button>
+              {selectedResources.length > 0 && (
+                <div style={{ marginTop: "8px" }}>
+                  <InlineStack gap="200">
+                    {selectedResources.map((r) => (
+                      <Tag key={r.id} onRemove={() => removeResource(r.id)}>
+                        {r.title}
+                      </Tag>
+                    ))}
+                  </InlineStack>
+                </div>
+              )}
+            </div>
           )}
 
           <div>
