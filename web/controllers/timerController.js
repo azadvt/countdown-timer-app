@@ -53,7 +53,7 @@ export async function getTimer(req, res, next) {
 export async function createTimer(req, res, next) {
   try {
     const shop = res.locals.shopify.session.shop;
-    const { name, type, startDate, endDate, duration, targetType, targetIds, style, isActive } = req.body;
+    const { name, description, type, startDate, endDate, duration, targetType, targetIds, style, isActive } = req.body;
 
     // type-specific validation
     if (type === "fixed") {
@@ -72,6 +72,7 @@ export async function createTimer(req, res, next) {
     const timer = await Timer.create({
       shop,
       name,
+      description: description || "",
       type,
       startDate: type === "fixed" ? startDate : undefined,
       endDate: type === "fixed" ? endDate : undefined,
@@ -97,7 +98,7 @@ export async function updateTimer(req, res, next) {
       return res.status(404).json({ error: "Timer not found" });
     }
 
-    const allowed = ["name", "type", "startDate", "endDate", "duration", "targetType", "targetIds", "style", "isActive"];
+    const allowed = ["name", "description", "type", "startDate", "endDate", "duration", "targetType", "targetIds", "style", "isActive"];
     for (const key of allowed) {
       if (req.body[key] !== undefined) {
         timer[key] = req.body[key];
