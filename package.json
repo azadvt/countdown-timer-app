@@ -9,14 +9,18 @@
     "dev": "shopify app dev",
     "info": "shopify app info",
     "generate": "shopify app generate",
-    "deploy": "shopify app deploy"
+    "deploy": "shopify app deploy",
+    "build:widget": "node widget-src/build.js"
   },
-  "dependencies": {},
   "author": "azadvt",
   "private": true,
   "workspaces": [
     "extensions/*",
     "web",
     "web/frontend"
-  ]
+  ],
+  "devDependencies": {
+    "esbuild": "^0.27.4",
+    "preact": "^10.29.0"
+  }
 }
