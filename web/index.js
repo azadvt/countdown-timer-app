@@ -8,6 +8,11 @@ import shopify from "./shopify.js";
 import productCreator from "./product-creator.js";
 import PrivacyWebhookHandlers from "./privacy.js";
 import connectDB from "./database/connect.js";
+import timerRoutes from "./routes/timerRoutes.js";
+import analyticsRoutes from "./routes/analyticsRoutes.js";
+import widgetRoutes from "./routes/widgetRoutes.js";
+import { adminLimiter } from "./middleware/rateLimiter.js";
+import errorHandler from "./middleware/errorHandler.js";
 
 const PORT = parseInt(
   process.env.BACKEND_PORT || process.env.PORT || "3000",
@@ -33,12 +38,17 @@ app.post(
   shopify.processWebhooks({ webhookHandlers: PrivacyWebhookHandlers })
 );
 
-// If you are adding routes outside of the /api path, remember to
-// also add a proxy rule for them in web/frontend/vite.config.js
+// storefront widget routes — public, no shopify auth needed
+// must be registered before the auth middleware below
+app.use(express.json());
+app.use("/api/storefront", widgetRoutes);
 
+// everything under /api (except storefront) requires shopify session
 app.use("/api/*", shopify.validateAuthenticatedSession());
 
-app.use(express.json());
+// admin routes
+app.use("/api/timers", adminLimiter, timerRoutes);
+app.use("/api/analytics", adminLimiter, analyticsRoutes);
 
 app.get("/api/products/count", async (_req, res) => {
   const client = new shopify.api.clients.Graphql({
@@ -70,6 +80,7 @@ app.post("/api/products", async (_req, res) => {
   res.status(status).send({ success: status === 200, error });
 });
 
+app.use(errorHandler);
 app.use(shopify.cspHeaders());
 app.use(serveStatic(STATIC_PATH, { index: false }));
 
