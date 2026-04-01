@@ -23,10 +23,12 @@ export const timerRules = [
   body("style.accentColor").optional().isString(),
   body("style.position")
     .optional()
-    .isIn(["above_title", "below_title", "below_price", "below_add_to_cart"]),
+    .isIn(["top", "bottom", "above_title", "below_title", "below_price"]),
+  body("style.size").optional().isIn(["small", "medium", "large"]),
+  body("style.urgencyEffect")
+    .optional()
+    .isIn(["none", "color_pulse", "shake", "glow"]),
   body("style.message").optional().isString().trim(),
-  body("style.urgencyMessage").optional().isString().trim(),
-  body("style.urgencyThreshold").optional().isInt({ min: 0 }),
 ];
 
 export const idParam = [
