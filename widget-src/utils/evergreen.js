@@ -19,7 +19,7 @@ export function getEvergreenEnd(timerId, durationSec) {
     const endTime = Date.now() + durationSec * 1000;
     localStorage.setItem(key, String(endTime));
     return endTime;
-  } catch (e) {
+  } catch {
     // localStorage might be blocked (incognito, safari)
     return Date.now() + durationSec * 1000;
   }

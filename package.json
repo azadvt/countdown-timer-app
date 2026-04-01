@@ -10,7 +10,8 @@
     "info": "shopify app info",
     "generate": "shopify app generate",
     "deploy": "shopify app deploy",
-    "build:widget": "node widget-src/build.js"
+    "build:widget": "node widget-src/build.js",
+    "lint": "eslint web/ widget-src/"
   },
   "author": "azadvt",
   "private": true,
@@ -20,7 +21,10 @@
     "web/frontend"
   ],
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "esbuild": "^0.27.4",
+    "eslint": "^10.1.0",
+    "globals": "^17.4.0",
     "preact": "^10.29.0"
   }
 }

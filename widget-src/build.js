@@ -13,7 +13,7 @@ esbuild.build({
     "process.env.NODE_ENV": '"production"',
   },
 }).then(() => {
-  console.log("Widget built successfully");
+  console.log("Widget built successfully"); // eslint-disable-line no-console
 }).catch((err) => {
   console.error(err);
   process.exit(1);

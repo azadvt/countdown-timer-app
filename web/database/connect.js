@@ -5,7 +5,7 @@ const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/countd
 export default async function connectDB() {
   try {
     await mongoose.connect(MONGODB_URI);
-    console.log("MongoDB connected");
+    console.log("MongoDB connected"); // eslint-disable-line no-console
   } catch (err) {
     console.error("MongoDB connection error:", err.message);
     process.exit(1);
