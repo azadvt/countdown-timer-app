@@ -8,7 +8,7 @@ import {
   hsbToHex,
   Button,
   Tag,
-  InlineStack,
+  Stack,
 } from "@shopify/polaris";
 
 // polaris v10 doesn't export hexToHsb, so we do it manually
@@ -307,13 +307,13 @@ export default function TimerModal({ open, onClose, onSubmit, timer, saving }) {
               </Button>
               {selectedResources.length > 0 && (
                 <div style={{ marginTop: "8px" }}>
-                  <InlineStack gap="200">
+                  <Stack spacing="tight">
                     {selectedResources.map((r) => (
                       <Tag key={r.id} onRemove={() => removeResource(r.id)}>
                         {r.title}
                       </Tag>
                     ))}
-                  </InlineStack>
+                  </Stack>
                 </div>
               )}
             </div>
